@@ -1,0 +1,1005 @@
+<title>ISNA63 Tech Rota</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<script>
+  // Fill these in after creating your Supabase project and setting the passcode.
+  // Supabase URL and anon key are safe to expose (Row Level Security controls access).
+  // The passcode is a soft gate — it lives in the client, so it keeps casual visitors out
+  // but is not real security. Rotate it in this file if you need to.
+  window.APP_CONFIG = {
+    SUPABASE_URL:      'https://YOUR-PROJECT.supabase.co',
+    SUPABASE_ANON_KEY: 'YOUR-ANON-KEY',
+    PASSCODE:          'change-me',
+  };
+</script>
+<style>
+  :root {
+    --ground: #F6F3EC;
+    --panel: #FFFFFF;
+    --ink: #1A241F;
+    --ink-soft: #4C5952;
+    --ink-mute: #8A948E;
+    --rule: #D9D2C2;
+    --rule-soft: #E7E2D3;
+    --accent: #0D5F5C;
+    --accent-soft: #C9DDDA;
+    --accent-ink: #072E2D;
+    --chip: #FFF8E4;
+    --chip-ink: #4B3A0F;
+    --chip-rule: #E9D89B;
+    --slot-empty: #FBF8F0;
+    --dropzone: #E8F1F0;
+    --danger: #A03A2C;
+    --serif: 'Instrument Serif', 'Times New Roman', serif;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101614;
+      --panel: #171F1C;
+      --ink: #EAE7DC;
+      --ink-soft: #B4B7AC;
+      --ink-mute: #6E7570;
+      --rule: #2A322F;
+      --rule-soft: #202824;
+      --accent: #6FC8C4;
+      --accent-soft: #1E3634;
+      --accent-ink: #B8E6E3;
+      --chip: #33291A;
+      --chip-ink: #F5DFA1;
+      --chip-rule: #574327;
+      --slot-empty: #131917;
+      --dropzone: #1E2F2D;
+      --danger: #E38472;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101614;
+    --panel: #171F1C;
+    --ink: #EAE7DC;
+    --ink-soft: #B4B7AC;
+    --ink-mute: #6E7570;
+    --rule: #2A322F;
+    --rule-soft: #202824;
+    --accent: #6FC8C4;
+    --accent-soft: #1E3634;
+    --accent-ink: #B8E6E3;
+    --chip: #33291A;
+    --chip-ink: #F5DFA1;
+    --chip-rule: #574327;
+    --slot-empty: #131917;
+    --dropzone: #1E2F2D;
+    --danger: #E38472;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 28px 80px; }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 14px 120px; }
+  }
+
+  header.top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 20px; border-bottom: 1px solid var(--rule);
+    margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+  }
+  @media (max-width: 640px) {
+    header.top { padding-bottom: 14px; margin-bottom: 16px; gap: 12px; }
+  }
+  header.top .lockup h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: 44px; line-height: 1; margin: 0 0 4px;
+    letter-spacing: -0.01em; text-wrap: balance;
+  }
+  @media (max-width: 640px) {
+    header.top .lockup h1 { font-size: 32px; }
+  }
+  header.top .lockup h1 em {
+    font-style: italic; color: var(--accent);
+  }
+  header.top .lockup p {
+    margin: 0; color: var(--ink-soft); font-size: 13px;
+  }
+  header.top .lockup p .dot { color: var(--ink-mute); margin: 0 8px; }
+
+  .toolbar {
+    display: flex; gap: 10px; align-items: center;
+  }
+  .day-tabs {
+    display: inline-flex; background: var(--panel);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 4px;
+  }
+  .day-tabs button {
+    appearance: none; border: 0; background: transparent;
+    font: 500 13px/1 var(--sans); color: var(--ink-soft);
+    padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .day-tabs button.on {
+    background: var(--accent); color: #fff;
+  }
+  .btn {
+    appearance: none; border: 1px solid var(--rule); background: var(--panel);
+    color: var(--ink); font: 500 12px/1 var(--sans); padding: 10px 14px;
+    border-radius: 8px; cursor: pointer; letter-spacing: 0.02em;
+    -webkit-tap-highlight-color: transparent; min-height: 36px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+  @media (max-width: 640px) {
+    .toolbar { width: 100%; justify-content: space-between; }
+    .day-tabs button { padding: 8px 14px; font-size: 12px; }
+  }
+
+  /* Tap-mode status bar (visible when a chip is picked) */
+  .status-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: var(--accent); color: #fff;
+    padding: 14px 18px calc(14px + env(safe-area-inset-bottom));
+    display: none; align-items: center; gap: 14px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.15);
+  }
+  .status-bar.show { display: flex; }
+  .status-bar .who { flex: 1; }
+  .status-bar .who b { font-weight: 700; }
+  .status-bar button {
+    appearance: none; border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.15); color: #fff;
+    padding: 8px 14px; border-radius: 6px; font: 500 12px/1 var(--sans);
+    cursor: pointer; letter-spacing: 0.03em;
+  }
+
+  .layout {
+    display: grid; grid-template-columns: 260px 1fr; gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 14px; }
+  }
+
+  /* Volunteer rail */
+  aside.roster {
+    position: sticky; top: 16px;
+    background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 12px; padding: 18px;
+  }
+  aside.roster h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  aside.roster .sub {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--ink-mute); margin: 0 0 14px;
+  }
+  .volunteer-list {
+    display: flex; flex-direction: column; gap: 6px;
+    min-height: 40px;
+  }
+  .volunteer-list.drop-hot {
+    background: var(--dropzone); border-radius: 8px; padding: 4px;
+  }
+  .chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--chip); color: var(--chip-ink);
+    border: 1px solid var(--chip-rule); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; font-weight: 500;
+    cursor: grab; user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.06s, box-shadow 0.06s, border-color 0.1s;
+  }
+  .chip:active { cursor: grabbing; }
+  .chip.dragging { opacity: 0.4; }
+  .chip.assigned-elsewhere { opacity: 0.55; }
+  .chip.selected {
+    border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+  .chip .avail {
+    margin-left: auto; font-size: 10px; color: var(--ink-mute);
+    letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500;
+  }
+  .chip .drag-handle {
+    font-family: var(--mono); color: var(--ink-mute); font-size: 11px;
+  }
+
+  aside.roster .legend {
+    margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--rule);
+    font-size: 11px; color: var(--ink-soft); line-height: 1.6;
+  }
+  aside.roster .legend b { color: var(--ink); font-weight: 600; }
+
+  /* Mobile roster: horizontal scroller, non-sticky */
+  @media (max-width: 900px) {
+    aside.roster {
+      position: sticky; top: 0; z-index: 20;
+      padding: 12px 12px 10px; border-radius: 10px;
+      background: color-mix(in srgb, var(--panel) 92%, transparent);
+      backdrop-filter: saturate(1.4) blur(10px);
+      -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    }
+    aside.roster h2 { font-size: 16px; margin-bottom: 2px; }
+    aside.roster .sub { font-size: 10px; margin-bottom: 8px; }
+    .volunteer-list {
+      flex-direction: row; overflow-x: auto; gap: 8px;
+      padding-bottom: 4px; scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+    }
+    .volunteer-list::-webkit-scrollbar { display: none; }
+    .chip { flex: 0 0 auto; scroll-snap-align: start; }
+    .chip .avail { display: none; }
+    .chip .drag-handle { display: none; }
+    aside.roster .legend { display: none; }
+  }
+
+  /* Schedule board */
+  .board {
+    background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 12px; padding: 20px; min-width: 0;
+  }
+  @media (max-width: 640px) {
+    .board { padding: 14px 12px; border-radius: 10px; }
+  }
+  .board-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--rule-soft);
+    gap: 10px; flex-wrap: wrap;
+  }
+  .board-head h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: 30px; margin: 0; letter-spacing: -0.01em;
+  }
+  @media (max-width: 640px) {
+    .board-head h2 { font-size: 24px; }
+    .board-head .meta { font-size: 10px; }
+  }
+  .board-head h2 em { color: var(--accent); font-style: italic; }
+  .board-head .meta {
+    font-size: 12px; color: var(--ink-mute); text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .block {
+    margin-top: 22px;
+  }
+  .block-title {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .block-title h3 {
+    font-family: var(--serif); font-weight: 400; margin: 0;
+    font-size: 20px; letter-spacing: -0.005em; color: var(--ink);
+  }
+  .block-title .time {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    letter-spacing: 0.02em; font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .block-title .need {
+    margin-left: auto; font-size: 11px; color: var(--ink-mute);
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  @media (max-width: 640px) {
+    .block-title h3 { font-size: 17px; }
+    .block-title .need { width: 100%; margin-left: 0; margin-top: -4px; font-size: 10px; }
+  }
+
+  .grid {
+    display: grid; gap: 8px;
+  }
+  .grid.rooms-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .grid.rooms-1 { grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: 1100px) {
+    .grid.rooms-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .grid.rooms-5 { grid-template-columns: 1fr; gap: 6px; }
+  }
+
+  .slot {
+    background: var(--slot-empty); border: 1px dashed var(--rule);
+    border-radius: 10px; padding: 10px; min-height: 88px;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: border-color 0.1s, background 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .slot.wide { min-height: 110px; }
+  .slot.drop-hot {
+    border-style: solid; border-color: var(--accent);
+    background: var(--dropzone);
+  }
+  .slot.tap-ready {
+    border-style: solid; border-color: var(--accent);
+    background: color-mix(in srgb, var(--dropzone) 60%, transparent);
+    cursor: pointer;
+  }
+  @media (max-width: 640px) {
+    .slot { min-height: 64px; padding: 10px 12px; }
+    .slot.wide { min-height: 84px; }
+  }
+  .slot .room {
+    display: flex; align-items: baseline; justify-content: space-between;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--ink-mute); font-weight: 600;
+  }
+  .slot .room .cap {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0;
+    text-transform: none; color: var(--ink-mute); font-weight: 500;
+  }
+  .slot .assigned {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .assigned .placed {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent-soft); color: var(--accent-ink);
+    border-radius: 6px; padding: 8px 10px; font-size: 13px; font-weight: 500;
+    cursor: grab; user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .assigned .placed:active { cursor: grabbing; }
+  .assigned .placed.dragging { opacity: 0.4; }
+  .assigned .placed .rm {
+    margin-left: auto; appearance: none; border: 0; background: transparent;
+    color: var(--accent-ink); opacity: 0.55; cursor: pointer;
+    font-size: 20px; line-height: 1; padding: 2px 8px;
+    min-width: 32px; min-height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .assigned .placed .rm:hover { opacity: 1; color: var(--danger); }
+  .assigned .placed .rm:active { opacity: 1; color: var(--danger); }
+
+  .slot .hint {
+    font-size: 11px; color: var(--ink-mute); font-style: italic;
+  }
+  .hint em { color: var(--ink-soft); font-style: normal; }
+
+  .day-view { display: none; }
+  .day-view.on { display: block; }
+
+  footer.foot {
+    margin-top: 40px; text-align: center; font-size: 11px;
+    color: var(--ink-mute); letter-spacing: 0.06em;
+  }
+
+  /* Sync indicator */
+  .sync-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-mute); padding: 6px 10px; border-radius: 999px;
+    border: 1px solid var(--rule); background: var(--panel);
+  }
+  .sync-pill .dot-i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink-mute);
+  }
+  .sync-pill.ok .dot-i { background: #4a9d5f; }
+  .sync-pill.err { color: var(--danger); border-color: var(--danger); }
+  .sync-pill.err .dot-i { background: var(--danger); }
+  .sync-pill.busy .dot-i { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* Passcode gate */
+  .gate {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--ground);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .gate-card {
+    background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 32px; max-width: 380px; width: 100%;
+    text-align: left;
+  }
+  .gate-card h2 {
+    font-family: var(--serif); font-weight: 400; font-size: 30px;
+    margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  .gate-card h2 em { color: var(--accent); font-style: italic; }
+  .gate-card p {
+    margin: 0 0 20px; color: var(--ink-soft); font-size: 13px;
+  }
+  .gate-card label {
+    display: block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--ink-mute); margin-bottom: 6px;
+  }
+  .gate-card input {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 14px; font: 500 15px/1 var(--sans);
+    background: var(--ground); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 8px;
+    outline: none; letter-spacing: 0.05em;
+  }
+  .gate-card input:focus { border-color: var(--accent); }
+  .gate-card .row {
+    display: flex; gap: 10px; align-items: center; margin-top: 14px;
+  }
+  .gate-card button {
+    appearance: none; border: 0; background: var(--accent);
+    color: #fff; padding: 12px 18px; border-radius: 8px;
+    font: 600 13px/1 var(--sans); cursor: pointer; letter-spacing: 0.03em;
+  }
+  .gate-card .err {
+    color: var(--danger); font-size: 12px; margin-top: 10px; min-height: 16px;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: black; }
+    .day-tabs, .btn, .toolbar { display: none; }
+    aside.roster { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .day-view { display: block !important; page-break-after: always; }
+    .board { border: 1px solid #ccc; padding: 12px; }
+    .slot { border-style: solid; border-color: #ccc; break-inside: avoid; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="lockup">
+      <h1>ISNA63 <em>Tech Rota</em></h1>
+      <p>Volunteer coverage · <span>Sat 5 &amp; Sun 6 September</span><span class="dot">·</span><span>Huntington Place, Detroit</span></p>
+    </div>
+    <div class="toolbar">
+      <div class="day-tabs" role="tablist">
+        <button class="on" data-day="sat" role="tab">Saturday</button>
+        <button data-day="sun" role="tab">Sunday</button>
+      </div>
+      <span class="sync-pill" id="syncPill" title="Sync status"><span class="dot-i"></span><span id="syncLabel">Offline</span></span>
+      <button class="btn" id="printBtn">Print</button>
+      <button class="btn danger" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="roster">
+      <h2>Volunteers</h2>
+      <p class="sub" id="rosterSub">Technology team · <span id="rosterDay">Saturday</span></p>
+      <div class="volunteer-list" id="volList"></div>
+      <div class="legend">
+        Drag a chip onto a slot to assign.<br>
+        Drag it back here to unassign.<br>
+        On mobile, tap the chip then tap the slot.
+      </div>
+    </aside>
+
+    <div class="board">
+      <!-- SATURDAY -->
+      <section class="day-view on" data-day="sat">
+        <div class="board-head">
+          <h2>Saturday <em>Sept 5</em></h2>
+          <div class="meta">3 breakouts · 1 film festival · 1 qira'at</div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Qira'at Competition Support</h3>
+            <span class="time">9:00 AM – 5:00 PM</span>
+            <span class="need">Room 410 · 1–2 volunteers · full day</span>
+          </div>
+          <div class="grid rooms-1" data-slotgroup="sat-qiraat">
+            <div class="slot wide" data-slot="sat-qiraat-410"><div class="room">Room 410 <span class="cap">Level 4</span></div><div class="assigned"></div><div class="hint">Drop <em>up to 2</em> volunteers here</div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Film Festival</h3>
+            <span class="time">11:00 AM – 5:30 PM</span>
+            <span class="need">Level 3 · continuous coverage</span>
+          </div>
+          <div class="grid rooms-1" data-slotgroup="sat-film">
+            <div class="slot wide" data-slot="sat-film"><div class="room">Film Festival Room <span class="cap">Level 3</span></div><div class="assigned"></div><div class="hint">Assign one or more volunteers for the day</div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Parallel Session 6</h3>
+            <span class="time">12:30 – 1:30 PM</span>
+            <span class="need">5 rooms · Level 1</span>
+          </div>
+          <div class="grid rooms-5" data-slotgroup="sat-p6">
+            <div class="slot" data-slot="sat-p6-140A"><div class="room">140 A</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p6-140D"><div class="room">140 D</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p6-140E"><div class="room">140 E</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p6-140F"><div class="room">140 F</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p6-141"><div class="room">141</div><div class="assigned"></div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Parallel Session 7</h3>
+            <span class="time">3:00 – 4:30 PM</span>
+            <span class="need">5 rooms · Level 1</span>
+          </div>
+          <div class="grid rooms-5" data-slotgroup="sat-p7">
+            <div class="slot" data-slot="sat-p7-140A"><div class="room">140 A</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p7-140D"><div class="room">140 D</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p7-140E"><div class="room">140 E</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p7-140F"><div class="room">140 F</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p7-141"><div class="room">141</div><div class="assigned"></div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Parallel Session 8</h3>
+            <span class="time">4:45 – 5:45 PM</span>
+            <span class="need">5 rooms · Level 1</span>
+          </div>
+          <div class="grid rooms-5" data-slotgroup="sat-p8">
+            <div class="slot" data-slot="sat-p8-140A"><div class="room">140 A</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p8-140D"><div class="room">140 D</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p8-140E"><div class="room">140 E</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p8-140F"><div class="room">140 F</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sat-p8-141"><div class="room">141</div><div class="assigned"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SUNDAY -->
+      <section class="day-view" data-day="sun">
+        <div class="board-head">
+          <h2>Sunday <em>Sept 6</em></h2>
+          <div class="meta">3 breakouts · 1 film festival</div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Film Festival</h3>
+            <span class="time">12:00 – 6:00 PM</span>
+            <span class="need">Level 3 · continuous coverage</span>
+          </div>
+          <div class="grid rooms-1" data-slotgroup="sun-film">
+            <div class="slot wide" data-slot="sun-film"><div class="room">Film Festival Room <span class="cap">Level 3</span></div><div class="assigned"></div><div class="hint">Assign one or more volunteers for the day</div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Parallel Session 14</h3>
+            <span class="time">12:30 – 1:30 PM</span>
+            <span class="need">5 rooms · Level 1</span>
+          </div>
+          <div class="grid rooms-5" data-slotgroup="sun-p14">
+            <div class="slot" data-slot="sun-p14-140A"><div class="room">140 A</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p14-140D"><div class="room">140 D</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p14-140F"><div class="room">140 F</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p14-141"><div class="room">141</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p14-410"><div class="room">410 <span class="cap">Level 4</span></div><div class="assigned"></div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Parallel Session 15</h3>
+            <span class="time">2:30 – 3:30 PM</span>
+            <span class="need">5 rooms · Level 1</span>
+          </div>
+          <div class="grid rooms-5" data-slotgroup="sun-p15">
+            <div class="slot" data-slot="sun-p15-140A"><div class="room">140 A</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p15-140D"><div class="room">140 D</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p15-140F"><div class="room">140 F</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p15-141"><div class="room">141</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p15-410"><div class="room">410 <span class="cap">Level 4</span></div><div class="assigned"></div></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">
+            <h3>Parallel Session 16</h3>
+            <span class="time">3:35 – 4:45 PM</span>
+            <span class="need">5 rooms · Level 1</span>
+          </div>
+          <div class="grid rooms-5" data-slotgroup="sun-p16">
+            <div class="slot" data-slot="sun-p16-140A"><div class="room">140 A</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p16-140D"><div class="room">140 D</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p16-140F"><div class="room">140 F</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p16-141"><div class="room">141</div><div class="assigned"></div></div>
+            <div class="slot" data-slot="sun-p16-410"><div class="room">410 <span class="cap">Level 4</span></div><div class="assigned"></div></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="foot">Assignments save locally in your browser · reset any time · tap a chip then tap a slot on phone</footer>
+</div>
+
+<div class="status-bar" id="statusBar" role="status" aria-live="polite">
+  <span class="who"><b id="pickedName">—</b> · tap a slot to place</span>
+  <button type="button" id="cancelPick">Cancel</button>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-card">
+    <h2>ISNA63 <em>Tech Rota</em></h2>
+    <p>Enter the team passcode to view and edit the volunteer schedule.</p>
+    <label for="gatePass">Passcode</label>
+    <input id="gatePass" type="password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <div class="row">
+      <button type="button" id="gateBtn">Unlock</button>
+    </div>
+    <div class="err" id="gateErr"></div>
+  </div>
+</div>
+
+<script>
+  const VOLUNTEERS = [
+    { id: 'shadee',   name: 'Shadee Baraka',        avail: 'sat+sun' },
+    { id: 'abdullah', name: 'Abdullah Haydar',      avail: 'sat+sun' },
+    { id: 'siraj',    name: 'Siraj Youness',        avail: 'sat+sun' },
+    { id: 'ashar',    name: 'Ashar Qazi',           avail: 'sat+sun' },
+    { id: 'omar',     name: 'M. Omar Zahran',       avail: 'sat+sun' },
+    { id: 'shahab',   name: 'Shahab Uddin',         avail: 'sat+sun' },
+    { id: 'aiman',    name: 'Aiman Almesbahi',      avail: 'sat+sun' },
+    { id: 'tanweer',  name: 'Tanweer Seikh',        avail: 'sat+sun' },
+    { id: 'ahmed',    name: 'Ahmed Said',           avail: 'sat+sun' },
+    { id: 'zahra',    name: 'Zahra Saiyed',         avail: 'sat+sun' },
+    { id: 'maaz',     name: 'Maaz Ahmed',           avail: 'sat only' },
+    { id: 'ali',      name: 'Ali Dado',             avail: 'sun only' },
+  ];
+
+  const STORE_KEY = 'isna63-tech-rota-v1';
+  const GATE_KEY  = 'isna63-tech-rota-unlocked';
+  let state = {};
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch(e) { state = {}; }
+
+  // ------- Sync layer (Supabase) -------
+  let supabase = null;
+  let syncTimer = null;
+  let lastPushed = 0;
+  let applyingRemote = false;
+  const cfg = window.APP_CONFIG || {};
+  const syncEnabled = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes('YOUR-PROJECT')
+                   && cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY');
+
+  function setSync(status, label) {
+    const pill = document.getElementById('syncPill');
+    const lab  = document.getElementById('syncLabel');
+    pill.classList.remove('ok', 'err', 'busy');
+    if (status) pill.classList.add(status);
+    lab.textContent = label;
+  }
+
+  async function initSupabase() {
+    if (!syncEnabled) {
+      setSync(null, 'Local only');
+      return;
+    }
+    setSync('busy', 'Connecting');
+    try {
+      const mod = await import('https://esm.sh/@supabase/supabase-js@2');
+      supabase = mod.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+        realtime: { params: { eventsPerSecond: 5 } },
+      });
+      // Initial fetch
+      const { data, error } = await supabase.from('rota').select('state').eq('id', 1).maybeSingle();
+      if (error) throw error;
+      if (data && data.state && typeof data.state === 'object') {
+        applyingRemote = true;
+        state = data.state;
+        applyingRemote = false;
+        render();
+      }
+      // Realtime subscribe
+      supabase.channel('rota-live')
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'rota', filter: 'id=eq.1' },
+          (payload) => {
+            const remote = payload.new && payload.new.state;
+            if (!remote) return;
+            // Ignore our own recent write echo
+            if (Date.now() - lastPushed < 800) return;
+            if (JSON.stringify(remote) === JSON.stringify(state)) return;
+            applyingRemote = true;
+            state = remote;
+            applyingRemote = false;
+            render();
+          })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') setSync('ok', 'Live');
+          else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setSync('err', 'Offline');
+        });
+    } catch (e) {
+      console.error('Supabase init failed', e);
+      setSync('err', 'Offline');
+    }
+  }
+
+  function scheduleSync() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
+    if (!supabase || applyingRemote) return;
+    setSync('busy', 'Saving');
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(async () => {
+      const snapshot = JSON.parse(JSON.stringify(state));
+      lastPushed = Date.now();
+      const { error } = await supabase.from('rota')
+        .upsert({ id: 1, state: snapshot, updated_at: new Date().toISOString() });
+      if (error) { console.error(error); setSync('err', 'Save failed'); }
+      else setSync('ok', 'Live');
+    }, 300);
+  }
+
+  function save() { scheduleSync(); }
+
+  function getSlot(slotId) { return state[slotId] || []; }
+
+  function assign(slotId, volId) {
+    const cur = getSlot(slotId);
+    if (cur.includes(volId)) return;
+    state[slotId] = [...cur, volId];
+    save();
+  }
+
+  function unassign(slotId, volId) {
+    if (!state[slotId]) return;
+    state[slotId] = state[slotId].filter(v => v !== volId);
+    if (state[slotId].length === 0) delete state[slotId];
+    save();
+  }
+
+  function isAssignedOnDay(volId, day) {
+    // returns true if volunteer is in any slot for that day
+    for (const [slotId, list] of Object.entries(state)) {
+      if (slotId.startsWith(day + '-') && list.includes(volId)) return true;
+    }
+    return false;
+  }
+
+  function render() {
+    renderRoster();
+    renderSlots();
+  }
+
+  function isAvailable(vol, day) {
+    if (vol.avail === 'sat+sun') return true;
+    if (day === 'sat' && vol.avail === 'sat only') return true;
+    if (day === 'sun' && vol.avail === 'sun only') return true;
+    return false;
+  }
+
+  function renderRoster() {
+    const list = document.getElementById('volList');
+    list.innerHTML = '';
+    const activeDay = document.querySelector('.day-view.on').dataset.day;
+    const dayLabel = document.getElementById('rosterDay');
+    if (dayLabel) dayLabel.textContent = activeDay === 'sat' ? 'Saturday' : 'Sunday';
+    const pool = VOLUNTEERS.filter(v => isAvailable(v, activeDay));
+    pool.forEach(v => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.draggable = true;
+      chip.dataset.vol = v.id;
+      chip.dataset.from = 'roster';
+      chip.tabIndex = 0;
+      if (picked && picked.vol === v.id && picked.from === 'roster') {
+        chip.classList.add('selected');
+      }
+      chip.innerHTML = `
+        <span class="drag-handle">⋮⋮</span>
+        <span class="nm">${v.name}</span>
+      `;
+      list.appendChild(chip);
+    });
+    attachDrag(list.querySelectorAll('.chip'));
+    attachTap(list.querySelectorAll('.chip'));
+  }
+
+  function volName(id) {
+    const v = VOLUNTEERS.find(x => x.id === id);
+    return v ? v.name : id;
+  }
+
+  function renderSlots() {
+    document.querySelectorAll('.slot').forEach(slot => {
+      const slotId = slot.dataset.slot;
+      const assignedBox = slot.querySelector('.assigned');
+      assignedBox.innerHTML = '';
+      slot.classList.toggle('tap-ready', !!picked);
+      getSlot(slotId).forEach(volId => {
+        const placed = document.createElement('div');
+        placed.className = 'placed';
+        placed.draggable = true;
+        placed.dataset.vol = volId;
+        placed.dataset.from = slotId;
+        if (picked && picked.vol === volId && picked.from === slotId) {
+          placed.classList.add('selected');
+        }
+        placed.innerHTML = `
+          <span>${volName(volId)}</span>
+          <button class="rm" type="button" title="Remove" aria-label="Remove ${volName(volId)}">&times;</button>
+        `;
+        placed.querySelector('.rm').addEventListener('click', (e) => {
+          e.stopPropagation();
+          unassign(slotId, volId);
+          renderSlots();
+        });
+        assignedBox.appendChild(placed);
+      });
+      attachDrag(assignedBox.querySelectorAll('.placed'));
+      attachTap(assignedBox.querySelectorAll('.placed'));
+    });
+  }
+
+  let dragged = null;
+  let picked = null; // { vol, from } — tap-to-place selection
+
+  function setPicked(next) {
+    picked = next;
+    const bar = document.getElementById('statusBar');
+    if (picked) {
+      document.getElementById('pickedName').textContent = volName(picked.vol);
+      bar.classList.add('show');
+    } else {
+      bar.classList.remove('show');
+    }
+    renderSlots();
+    renderRoster();
+  }
+
+  function attachTap(nodes) {
+    nodes.forEach(el => {
+      el.addEventListener('click', (e) => {
+        // Ignore if the click was on the remove button
+        if (e.target.closest('.rm')) return;
+        const vol = el.dataset.vol;
+        const from = el.dataset.from;
+        // Toggle: tap the same chip again to cancel
+        if (picked && picked.vol === vol && picked.from === from) {
+          setPicked(null);
+          return;
+        }
+        setPicked({ vol, from });
+      });
+    });
+  }
+
+  function attachDrag(nodes) {
+    nodes.forEach(el => {
+      el.addEventListener('dragstart', (e) => {
+        dragged = { vol: el.dataset.vol, from: el.dataset.from };
+        el.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', el.dataset.vol); } catch(_){}
+      });
+      el.addEventListener('dragend', () => {
+        el.classList.remove('dragging');
+        dragged = null;
+      });
+    });
+  }
+
+  // Drop targets: slots + roster
+  document.querySelectorAll('.slot').forEach(slot => {
+    slot.addEventListener('dragover', (e) => {
+      if (!dragged) return;
+      e.preventDefault();
+      slot.classList.add('drop-hot');
+    });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drop-hot'));
+    slot.addEventListener('drop', (e) => {
+      e.preventDefault();
+      slot.classList.remove('drop-hot');
+      if (!dragged) return;
+      const target = slot.dataset.slot;
+      if (dragged.from === target) return;
+      if (dragged.from !== 'roster') {
+        unassign(dragged.from, dragged.vol);
+      }
+      assign(target, dragged.vol);
+      renderSlots();
+      renderRoster();
+    });
+    // Tap-to-place: click empty part of slot when a chip is picked
+    slot.addEventListener('click', (e) => {
+      if (!picked) return;
+      // Don't hijack clicks on placed chips inside this slot
+      if (e.target.closest('.placed')) return;
+      const target = slot.dataset.slot;
+      if (picked.from === target) { setPicked(null); return; }
+      if (picked.from !== 'roster') unassign(picked.from, picked.vol);
+      assign(target, picked.vol);
+      setPicked(null);
+    });
+  });
+
+  const rosterEl = document.getElementById('volList');
+  rosterEl.addEventListener('dragover', (e) => {
+    if (!dragged || dragged.from === 'roster') return;
+    e.preventDefault();
+    rosterEl.classList.add('drop-hot');
+  });
+  rosterEl.addEventListener('dragleave', () => rosterEl.classList.remove('drop-hot'));
+  rosterEl.addEventListener('drop', (e) => {
+    e.preventDefault();
+    rosterEl.classList.remove('drop-hot');
+    if (!dragged || dragged.from === 'roster') return;
+    unassign(dragged.from, dragged.vol);
+    renderSlots();
+    renderRoster();
+  });
+  // Tap-to-unassign: tap the roster background while a placed chip is picked
+  rosterEl.addEventListener('click', (e) => {
+    if (!picked || picked.from === 'roster') return;
+    if (e.target.closest('.chip')) return;
+    unassign(picked.from, picked.vol);
+    setPicked(null);
+  });
+
+  document.getElementById('cancelPick').addEventListener('click', () => setPicked(null));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && picked) setPicked(null);
+  });
+
+  // Day tabs
+  document.querySelectorAll('.day-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.day-tabs button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      document.querySelectorAll('.day-view').forEach(dv => dv.classList.remove('on'));
+      document.querySelector(`.day-view[data-day="${btn.dataset.day}"]`).classList.add('on');
+      renderRoster();
+    });
+  });
+
+  document.getElementById('printBtn').addEventListener('click', () => window.print());
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm('Clear all assignments for the whole team?')) {
+      state = {};
+      save();
+      render();
+    }
+  });
+
+  // ------- Passcode gate -------
+  function unlocked() {
+    try { return localStorage.getItem(GATE_KEY) === (cfg.PASSCODE || ''); } catch(_) { return false; }
+  }
+  function showGate() {
+    const gate = document.getElementById('gate');
+    gate.hidden = false;
+    const input = document.getElementById('gatePass');
+    const btn   = document.getElementById('gateBtn');
+    const err   = document.getElementById('gateErr');
+    setTimeout(() => input.focus(), 40);
+    const attempt = () => {
+      if (input.value === cfg.PASSCODE) {
+        try { localStorage.setItem(GATE_KEY, cfg.PASSCODE); } catch(_){}
+        gate.hidden = true;
+        boot();
+      } else {
+        err.textContent = 'Wrong passcode.';
+        input.select();
+      }
+    };
+    btn.addEventListener('click', attempt);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
+  }
+
+  function boot() {
+    render();
+    initSupabase();
+  }
+
+  if (!cfg.PASSCODE || cfg.PASSCODE === 'change-me' || unlocked()) {
+    boot();
+  } else {
+    showGate();
+  }
+</script>
