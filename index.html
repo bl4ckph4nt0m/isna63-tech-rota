@@ -2,14 +2,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <script>
-  // Fill these in after creating your Supabase project and setting the passcode.
-  // Supabase URL and anon key are safe to expose (Row Level Security controls access).
-  // The passcode is a soft gate — it lives in the client, so it keeps casual visitors out
-  // but is not real security. Rotate it in this file if you need to.
   window.APP_CONFIG = {
-    SUPABASE_URL:      'https://YOUR-PROJECT.supabase.co',
-    SUPABASE_ANON_KEY: 'YOUR-ANON-KEY',
-    PASSCODE:          'change-me',
+    PASSCODE: 'isna2026',
   };
 </script>
 <style>
@@ -614,7 +608,7 @@
     </div>
   </div>
 
-  <footer class="foot">Assignments save locally in your browser · reset any time · tap a chip then tap a slot on phone</footer>
+  <footer class="foot">Assignments sync live across all devices · tap a chip then tap a slot on phone</footer>
 </div>
 
 <div class="status-bar" id="statusBar" role="status" aria-live="polite">
@@ -659,14 +653,11 @@
     if (raw) state = JSON.parse(raw);
   } catch(e) { state = {}; }
 
-  // ------- Sync layer (Supabase) -------
-  let supabase = null;
+  // ------- Sync layer (fetch-based API) -------
   let syncTimer = null;
-  let lastPushed = 0;
+  let pollTimer = null;
   let applyingRemote = false;
   const cfg = window.APP_CONFIG || {};
-  const syncEnabled = cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes('YOUR-PROJECT')
-                   && cfg.SUPABASE_ANON_KEY && !cfg.SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY');
 
   function setSync(status, label) {
     const pill = document.getElementById('syncPill');
@@ -676,63 +667,66 @@
     lab.textContent = label;
   }
 
-  async function initSupabase() {
-    if (!syncEnabled) {
-      setSync(null, 'Local only');
-      return;
-    }
+  async function initSync() {
     setSync('busy', 'Connecting');
     try {
-      const mod = await import('https://esm.sh/@supabase/supabase-js@2');
-      supabase = mod.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
-        realtime: { params: { eventsPerSecond: 5 } },
-      });
-      // Initial fetch
-      const { data, error } = await supabase.from('rota').select('state').eq('id', 1).maybeSingle();
-      if (error) throw error;
-      if (data && data.state && typeof data.state === 'object') {
+      const res = await fetch('/api/rota');
+      if (!res.ok) throw new Error(res.statusText);
+      const remote = await res.json();
+      if (remote && typeof remote === 'object' && Object.keys(remote).length > 0) {
         applyingRemote = true;
-        state = data.state;
+        state = remote;
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
         applyingRemote = false;
         render();
       }
-      // Realtime subscribe
-      supabase.channel('rota-live')
-        .on('postgres_changes',
-          { event: '*', schema: 'public', table: 'rota', filter: 'id=eq.1' },
-          (payload) => {
-            const remote = payload.new && payload.new.state;
-            if (!remote) return;
-            // Ignore our own recent write echo
-            if (Date.now() - lastPushed < 800) return;
-            if (JSON.stringify(remote) === JSON.stringify(state)) return;
-            applyingRemote = true;
-            state = remote;
-            applyingRemote = false;
-            render();
-          })
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') setSync('ok', 'Live');
-          else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setSync('err', 'Offline');
-        });
+      setSync('ok', 'Live');
+      startPolling();
     } catch (e) {
-      console.error('Supabase init failed', e);
+      console.error('API connect failed', e);
       setSync('err', 'Offline');
+      setTimeout(initSync, 5000);
     }
+  }
+
+  function startPolling() {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch('/api/rota');
+        if (!res.ok) { setSync('err', 'Offline'); return; }
+        const remote = await res.json();
+        if (JSON.stringify(remote) === JSON.stringify(state)) return;
+        applyingRemote = true;
+        state = remote;
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
+        applyingRemote = false;
+        render();
+        setSync('ok', 'Live');
+      } catch (e) {
+        setSync('err', 'Offline');
+      }
+    }, 3000);
   }
 
   function scheduleSync() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
-    if (!supabase || applyingRemote) return;
+    if (applyingRemote) return;
     setSync('busy', 'Saving');
     clearTimeout(syncTimer);
     syncTimer = setTimeout(async () => {
-      const snapshot = JSON.parse(JSON.stringify(state));
-      lastPushed = Date.now();
-      const { error } = await supabase.from('rota')
-        .upsert({ id: 1, state: snapshot, updated_at: new Date().toISOString() });
-      if (error) { console.error(error); setSync('err', 'Save failed'); }
-      else setSync('ok', 'Live');
+      try {
+        const res = await fetch('/api/rota', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state),
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        setSync('ok', 'Live');
+      } catch (e) {
+        console.error('Save failed', e);
+        setSync('err', 'Save failed');
+      }
     }, 300);
   }
 
@@ -994,7 +988,7 @@
 
   function boot() {
     render();
-    initSupabase();
+    initSync();
   }
 
   if (!cfg.PASSCODE || cfg.PASSCODE === 'change-me' || unlocked()) {
